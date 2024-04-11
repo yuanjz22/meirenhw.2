@@ -2,8 +2,8 @@
 #             Media and Cognition
 #             Homework 2 Convolutional Neural Network
 #             train.py - Train traffic sign classification model
-#             Student ID:
-#             Name:
+#             Student ID:2022010657
+#             Name:元敬哲
 #             Tsinghua University
 #             (C) Copyright 2024
 # ========================================================

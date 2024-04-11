@@ -2,8 +2,8 @@
 #             Media and Cognition
 #             Homework 2 Convolutional Neural Network
 #             unit_test.py - Test your implementation of several modules
-#             Student ID:
-#             Name:
+#             Student ID:2022010657
+#             Name:元敬哲
 #             Tsinghua University
 #             (C) Copyright 2024
 # ========================================================

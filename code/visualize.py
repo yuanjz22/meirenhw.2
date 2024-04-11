@@ -2,8 +2,8 @@
 #             Media and Cognition
 #             Homework 2 Convolutional Neural Network
 #             visual.py - Visualization
-#             Student ID:
-#             Name:
+#             Student ID:2022010657
+#             Name:元敬哲
 #             Tsinghua University
 #             (C) Copyright 2024
 # ========================================================
