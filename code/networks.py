@@ -49,15 +49,17 @@ class ConvBlock(nn.Module):
         # Hint: use the `bn2d` defined above for batch normalization to adapt to the input parameter `use_batch_norm`
         # Network structure:
         # conv -> batchnorm -> relu
-        self.conv = ?
-        self.bn = ?
-        self.relu = ?
+        self.conv = nn.Conv2d(out_channels,in_channels,kernel_size,stride=stride,padding=padding)
+        self.bn = bn2d
+        self.relu = nn.Relu()
         # <<< TODO 2.1
 
     def forward(self, x):
         # >>> TODO 2.2: forward process
         # Hint: apply residual connection if `self.use_residual` is True
-
+        out = self.relu(self.bn(self.conv(x)))
+        if self.use_residual:
+            out+=x
         # <<< TODO 2.2
         return out
 
