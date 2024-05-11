@@ -2,8 +2,8 @@
 #             Media and Cognition
 #             Homework 2 Convolutional Neural Network
 #             networks.py - Network definition
-#             Student ID:
-#             Name:
+#             Student ID:2022010657
+#             Name:元敬哲
 #             Tsinghua University
 #             (C) Copyright 2024
 # ========================================================
@@ -49,17 +49,24 @@ class ConvBlock(nn.Module):
         # Hint: use the `bn2d` defined above for batch normalization to adapt to the input parameter `use_batch_norm`
         # Network structure:
         # conv -> batchnorm -> relu
-        self.conv = nn.Conv2d(out_channels,in_channels,kernel_size,stride=stride,padding=padding)
-        self.bn = bn2d
-        self.relu = nn.Relu()
+        self.conv = nn.Conv2d(in_channels,out_channels,kernel_size,stride=stride,padding=padding)
+        self.bn = bn2d(out_channels)
+        self.relu = nn.ReLU()
         # <<< TODO 2.1
 
     def forward(self, x):
         # >>> TODO 2.2: forward process
         # Hint: apply residual connection if `self.use_residual` is True
-        out = self.relu(self.bn(self.conv(x)))
+           # 应用卷积操作
+        out = self.conv(x)
+        # 应用批标准化
+        out = self.bn(out)
+        # 应用ReLU激活函数
+        out = self.relu(out)
+        # 如果使用残差连接，则将卷积操作的输出和输入相加
         if self.use_residual:
-            out+=x
+            out = out+ x
+       
         # <<< TODO 2.2
         return out
 
@@ -110,7 +117,14 @@ class Classifier(nn.Module):
         # dropout(p), where p is input parameter of dropout ratio
 
         self.conv_net = nn.Sequential(
-
+            ConvBlock(kernel_size=5,stride=1,padding=2,out_channels=32,in_channels=in_channels),
+            ConvBlock(kernel_size=5,stride=2,padding=2,out_channels=64,in_channels=32),
+            nn.MaxPool2d(kernel_size=2,stride=2),
+            ConvBlock(kernel_size=3,stride=1,padding=1,out_channels=64,in_channels=64,use_residual=True),
+            ConvBlock(kernel_size=3,stride=1,padding=1,out_channels=128,in_channels=64),
+            nn.MaxPool2d(kernel_size=2,stride=2),
+            ConvBlock(kernel_size=3,stride=1,padding=1,out_channels=128,in_channels=128,use_residual=True),
+            nn.Dropout(dropout_prob)
         )
         # <<< TODO 3.1
 
@@ -127,7 +141,11 @@ class Classifier(nn.Module):
         # dropout(p), where p is input parameter of dropout ratio
         # linear       num_classes
         self.fc_net = nn.Sequential(
-
+            nn.Linear(128*4*4,256),
+            nn.ReLU(),
+            bn1d(256),
+            nn.Dropout(dropout_prob),
+            nn.Linear(256,num_classes)
         )
         # <<< TODO 3.2
 
@@ -142,12 +160,12 @@ class Classifier(nn.Module):
 
         # >>> TODO 3.3: forward process
         # Step 2: forward process for the convolutional network
-
+        x = self.conv_net(x)
         # Step 3: use `Tensor.view()` to flatten the tensor to match the size of the input of the
         # fully connected layers.
-
+        x = x.view(x.shape[0],-1)
         # Step 4: forward process for the fully connected network
-
+        out = self.fc_net(x)
         # <<< TODO 3.3
 
         return out
@@ -186,7 +204,9 @@ class STN(nn.Module):
         # this network.
         # Suggested structure: 3 down-sampling convolutional layers with doubling output channels, using BN and ReLU.
         self.localization_conv = nn.Sequential(
-
+                ConvBlock(in_channels,32,5,2,2,use_batch_norm=True),
+                ConvBlock(32,64,5,2,2,use_batch_norm=True),
+                ConvBlock(64,128,3,2,1,use_batch_norm=True)
         )
 
         # Step 2: Build a fully connected network to predict the parameters of affine transformation from
@@ -194,7 +214,10 @@ class STN(nn.Module):
         # Hint: Combine linear layers and ReLU activation functions to build this network.
         # Suggested structure: 2 linear layers with one BN and ReLU.
         self.localization_fc = nn.Sequential(
-
+            nn.Linear(128*4*4,256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Linear(256,6)
         )
         # <<< TODO 4.1
 
@@ -202,7 +225,10 @@ class STN(nn.Module):
         # Hint: The STN should generate the identity transformation by default before training.
         # How to initialize the weight/bias of the last linear layer of the fully connected network to
         # achieve this goal?
-
+        with torch.no_grad():
+            self.localization_fc[-1].weight.data.zero_()
+            self.localization_fc[-1].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
+        
         # <<< TODO 4.2
 
     def forward(self, x):

@@ -25,7 +25,8 @@ def test_data_loader():
     images, labels = next(iter(train_loader))
     # print labels
     print(" ".join(chr(65 + x) for x in labels))
-    # show images
+    # show imag
+    # es
     imshow(make_grid(images))
 
 

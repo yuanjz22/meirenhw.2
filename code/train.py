@@ -24,6 +24,8 @@ import torch.optim as optim
 from datasets import get_data_loader
 from networks import Classifier
 
+# torch.autograd.set_detect_anomaly(True)
+
 
 # ==== Part 2: training and validation
 def train(
